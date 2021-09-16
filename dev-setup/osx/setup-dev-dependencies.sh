@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 1 ]; then
  echo "Please specify indy-sdk version tag"
  echo "e.g ./setup-dev-dependencies.sh 1.6.7"
  exit 1
