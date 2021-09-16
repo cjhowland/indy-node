@@ -32,6 +32,7 @@ config = getConfig()
 NAMESPACE = config.NETWORK_NAME
 # TODO - Clean up
 DID_CONTEXT = "https://www.w3.org/ns/did/v1"
+ENABLE_DID_INDY = config.ENABLE_DID_INDY
 
 
 class NymHandler(PNymHandler):
@@ -145,7 +146,7 @@ class NymHandler(PNymHandler):
                     "Non-ledger nym txn must contain verkey for new did",
                 )
 
-        if not self._is_self_certifying(
+        if ENABLE_DID_INDY and not self._is_self_certifying(
             request.operation.get(TARGET_NYM), request.operation.get(VERKEY)
         ):
             raise InvalidClientRequest(

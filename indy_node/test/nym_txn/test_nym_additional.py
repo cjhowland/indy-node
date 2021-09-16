@@ -4,6 +4,7 @@ import pytest
 from indy.did import create_and_store_my_did, replace_keys_start, replace_keys_apply
 from indy.ledger import build_get_nym_request
 from indy_common.constants import ENDORSER_STRING
+from indy_common.config_util import getConfig
 from indy_node.test.helper import sdk_add_attribute_and_check
 from plenum.common.exceptions import RequestRejectedException
 from plenum.common.util import randomString
@@ -13,6 +14,10 @@ from plenum.test.pool_transactions.helper import (
     prepare_nym_request,
     sdk_add_new_nym,
 )
+
+config = getConfig()
+ENABLE_DID_INDY = config.ENABLE_DID_INDY
+
 
 ENDORSER_SEED = "TRUST0NO0ONE00000000000000000001"
 
@@ -84,7 +89,6 @@ def test_send_same_nyms_only_first_gets_written(looper, sdk_pool_handle, sdk_wal
 
 def get_nym(looper, sdk_pool_handle, sdk_wallet_steward, t_did):
     _, s_did = sdk_wallet_steward
-    print(json.dumps(build_get_nym_request(s_did, t_did)))
     get_nym_req = looper.loop.run_until_complete(build_get_nym_request(s_did, t_did))
     req = sdk_sign_and_send_prepared_request(
         looper, sdk_wallet_steward, sdk_pool_handle, get_nym_req
@@ -100,16 +104,33 @@ def test_get_nym_without_adding_it(
     assert not rep[0][1]["result"]["data"]
 
 
+@pytest.mark.skipif(ENABLE_DID_INDY, reason="DID Indy")
 @pytest.fixture(scope="module")
 def nym_added(looper, sdk_pool_handle, sdk_wallet_steward, endorser_did_verkey):
     dest, _ = endorser_did_verkey
     set_verkey(looper, sdk_pool_handle, sdk_wallet_steward, dest, None)
 
 
+@pytest.mark.skipif(ENABLE_DID_INDY, reason="DID Indy")
 def test_add_nym(nym_added):
     pass
 
 
+@pytest.mark.skipif(not ENABLE_DID_INDY, reason="DID Indy")
+@pytest.fixture(scope="module")
+def nym_added_with_verkey(
+    looper, sdk_pool_handle, sdk_wallet_steward, endorser_did_verkey
+):
+    dest, verkey = endorser_did_verkey
+    set_verkey(looper, sdk_pool_handle, sdk_wallet_steward, dest, verkey)
+
+
+@pytest.mark.skipif(not ENABLE_DID_INDY, reason="DID Indy")
+def test_add_nym_with_verkey(nym_added_with_verkey):
+    pass
+
+
+@pytest.mark.skipif(ENABLE_DID_INDY, reason="DID Indy")
 def test_get_nym_without_verkey(
     looper, sdk_pool_handle, sdk_wallet_steward, nym_added, endorser_did_verkey
 ):
@@ -119,6 +140,7 @@ def test_get_nym_without_verkey(
     assert not json.loads(rep[0][1]["result"]["data"])["verkey"]
 
 
+@pytest.mark.skipif(ENABLE_DID_INDY, reason="DID Indy")
 @pytest.fixture(scope="module")
 def verkey_added_to_nym(
     looper, sdk_pool_handle, sdk_wallet_steward, nym_added, endorser_did_verkey
@@ -132,6 +154,13 @@ def verkey_added_to_nym(
     looper.loop.run_until_complete(replace_keys_apply(wh, did))
 
 
+@pytest.mark.skipif(not ENABLE_DID_INDY, reason="DID Indy")
+@pytest.fixture(scope="module")
+def verkey_added_to_nym(nym_added_with_verkey):
+    pass
+
+
+@pytest.mark.skipif(ENABLE_DID_INDY, reason="DID Indy")
 def test_add_verkey_to_existing_nym(verkey_added_to_nym):
     pass
 
