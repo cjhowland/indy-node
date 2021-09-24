@@ -119,3 +119,5 @@ ENABLE_RICH_SCHEMAS = False
 # This breaks a lot of tests because identifiers
 # without verkeys are registered
 ENABLE_DID_INDY = False
+# Set this here because GHA tests are failing if not set
+NETWORK_NAME = "idunion"
