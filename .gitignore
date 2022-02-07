@@ -43,6 +43,7 @@ cli_output.log
 nosetests.xml
 coverage.xml
 tails/
+.pytest_cache/
 
 # Translations
 *.mo
@@ -79,7 +80,7 @@ docs/source/api_docs/
 *.idea
 *.iml
 
-#vscode
+# vscode
 .vscode
 
 # Vagrant files
@@ -87,3 +88,6 @@ docs/source/api_docs/
 
 # test output from working with GitHub actions
 test-result-node.xml
+
+# Dev container
+.devcontainer

@@ -115,3 +115,9 @@ CONTEXT_SIZE_LIMIT = 131072
 JSON_LD_LIMIT = CONTEXT_SIZE_LIMIT
 
 ENABLE_RICH_SCHEMAS = False
+# Enable enforcing self-certifying identifiers
+# This breaks a lot of tests because identifiers
+# without verkeys are registered
+ENABLE_DID_INDY = False
+# Set this here because GHA tests are failing if not set
+NETWORK_NAME = "idunion"
