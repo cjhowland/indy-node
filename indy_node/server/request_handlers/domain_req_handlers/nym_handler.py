@@ -1,5 +1,7 @@
 from binascii import hexlify
+from hashlib import sha256
 from typing import Optional
+import base58
 
 import base58
 from common.serializers.serialization import domain_state_serializer
@@ -129,6 +131,11 @@ class NymHandler(PNymHandler):
         nym_data = self.database_manager.idr_cache.getNym(
             request.identifier, isCommitted=False
         )
+
+        if operation[TARGET_NYM] != base58(sha256(b'VERKEY').digest()[:16]):
+            raise InvalidClientRequest("Invalid dest {}. Must be first 16 bytes of SHA256 of verkey".format(operation[TARGET_NYM]))
+
+        nym_data = self.database_manager.idr_cache.getNym(request.identifier, isCommitted=False)
         if not nym_data:
             # Non-ledger nym case. These two checks duplicated and mainly executed in client_authn,
             # but it has point to repeat them here, for clear understanding of validation non-ledger request cases.
