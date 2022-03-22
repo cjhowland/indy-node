@@ -61,15 +61,13 @@ class NymHandler(PNymHandler):
             nym = nym.strip()
         if not nym:
             raise InvalidClientRequest(
-                identifier, req_id, "{} needs to be present".format(TARGET_NYM)
-            )
-        if not Authoriser.isValidRole(role):
-            raise InvalidClientRequest(
-                identifier, req_id, "{} not a valid role".format(role)
+                identifier, req_id, f"{TARGET_NYM} needs to be present"
             )
 
-        diddoc_content = operation.get(DIDDOC_CONTENT, None)
-        if diddoc_content:
+        if not Authoriser.isValidRole(role):
+            raise InvalidClientRequest(identifier, req_id, f"{role} not a valid role")
+
+        if diddoc_content := operation.get(DIDDOC_CONTENT, None):
             diddoc_content = json.loads(diddoc_content)
             try:
                 self._validate_diddoc_content(diddoc_content)
@@ -107,11 +105,9 @@ class NymHandler(PNymHandler):
         self._validate_request_type(request)
         operation = request.operation
         assert isinstance(operation, Mapping)
-        nym_data = self.database_manager.idr_cache.getNym(
+        if nym_data := self.database_manager.idr_cache.getNym(
             operation[TARGET_NYM], isCommitted=False
-        )
-
-        if nym_data:
+        ):
             self._validate_existing_nym(request, operation, nym_data)
         else:
             self._validate_new_nym(request, operation)
@@ -209,6 +205,14 @@ class NymHandler(PNymHandler):
 
         updateKeys = [ROLE, VERKEY]
         updateKeysInOperationOrOwner = is_owner
+
+        if NYM_VERSION in operation:
+            raise InvalidClientRequest(
+                request.identifier,
+                request.reqId,
+                "Cannot set version on existing nym"
+            )
+
         for key in updateKeys:
             if key in operation:
                 updateKeysInOperationOrOwner = True
@@ -226,11 +230,10 @@ class NymHandler(PNymHandler):
                         )
                     ],
                 )
+
         if not updateKeysInOperationOrOwner:
             raise InvalidClientRequest(request.identifier, request.reqId)
 
-        if nym_data.get(NYM_VERSION):
-            raise InvalidClientRequest(request.identifier, request.reqId)
 
     def _decode_state_value(self, encoded):
         if encoded:
