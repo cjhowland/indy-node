@@ -250,3 +250,4 @@ def test_nym_txn_rejected_with_both_seqNo_and_timestamp(
     e.match("InvalidClientRequest")
     e.match("client request invalid")
     e.match("Cannot resolve nym with both seqNo and timestamp present.")
+

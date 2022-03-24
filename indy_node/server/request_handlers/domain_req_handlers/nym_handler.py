@@ -152,10 +152,6 @@ class NymHandler(PNymHandler):
         nym_data = self.database_manager.idr_cache.getNym(
             request.identifier, isCommitted=False
         )
-
-        nym_data = self.database_manager.idr_cache.getNym(
-            request.identifier, isCommitted=False
-        )
         if not nym_data:
             # Non-ledger nym case. These two checks duplicated and mainly executed in client_authn,
             # but it has point to repeat them here, for clear understanding of validation non-ledger request cases.
@@ -174,7 +170,7 @@ class NymHandler(PNymHandler):
                     "Non-ledger nym txn must contain verkey for new did",
                 )
 
-        version = nym_data.get(NYM_VERSION)
+        version = request.operation.get(NYM_VERSION)
         if version == 1 and not self._legacy_convention_validation(
             request.operation.get(TARGET_NYM), request.operation.get(VERKEY)
         ):
@@ -255,7 +251,7 @@ class NymHandler(PNymHandler):
     def _legacy_convention_validation(self, did, verkey):
         """did:sov method validation: the did is derived
         from the first 16 bytes of the verkey"""
-        return did == base58.b58decode(verkey).digest()[:16]
+        return did == base58.b58encode(base58.b58decode(verkey)[:16])
 
     def _validate_diddoc_content(self, diddoc):
 
